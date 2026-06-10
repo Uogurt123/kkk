@@ -19,7 +19,7 @@ STAR_PRICE = 0.85
 logging.basicConfig(level=logging.INFO)
 
 if not TOKEN or not ADMIN_ID:
-    raise ValueError("Перемінные BOT_TOKEN или ADMIN_ID не заданы в настройках Railway!")
+    raise ValueError("Перемінні BOT_TOKEN або ADMIN_ID не задані в налаштуваннях Railway!")
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
@@ -28,7 +28,7 @@ class PurchaseState(StatesGroup):
     waiting_for_amount = State()
     waiting_for_receipt = State()
 
-# --- РОБОТА З БАЗОЮ ДАНИХ (Перенесено в /tmp для Railway) ---
+# --- РОБОТА З БАЗОЮ ДАНИХ (Тимчасова папка для Railway, щоб не було помилок прав) ---
 DB_PATH = "/tmp/bot_database.db"
 
 def init_db():
@@ -68,10 +68,10 @@ def add_user_stars(user_id: int, stars_to_add: int):
     except Exception as e:
         logging.error(f"Помилка додавання зірок в БД: {e}")
 
-# Ініціалізуємо БД
+# Ініціалізуємо БД при старті
 init_db()
 
-# --- КЛАВИАТУРЫ ---
+# --- КЛАВІАТУРИ ---
 
 def get_main_menu():
     buttons = [
@@ -95,7 +95,7 @@ def get_admin_keyboard(user_id: int, stars: int):
     ]
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
-# --- ХЕНДЛЕРЫ ---
+# --- ХЕНДЛЕРИ ---
 
 @dp.message(CommandStart())
 async def cmd_start(message: Message, state: FSMContext):
@@ -231,10 +231,10 @@ async def process_receipt_wrong_format(message: Message):
 @dp.callback_query(F.data == "cancel_payment")
 async def press_cancel(callback: CallbackQuery, state: FSMContext):
     await state.clear()
-    await callback.message.answer("❌ <b>Покупка Скасована.</b>", parse_mode="HTML", reply_markup=get_main_menu())
+    await callback.message.answer("❌ <b>Покупку Скасована.</b>", parse_mode="HTML", reply_markup=get_main_menu())
     await callback.answer()
 
-# --- ОБРАБОТКА ДЕЙСТВИЙ АДМИНИСТРАТОРА (ТЕБЯ) ---
+# --- ОБРОБКА ДІЙ АДМІНІСТРАТОРА (ТЕБЕ) ---
 
 @dp.callback_query(F.data.startswith("confirm_"))
 async def admin_confirm_payment(callback: CallbackQuery):
