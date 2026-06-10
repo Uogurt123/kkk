@@ -395,5 +395,3 @@ async def press_cancel(callback: CallbackQuery, state: FSMContext):
 
 if __name__ == "__main__":
     asyncio.run(main()
-if __name__ == "__main__":
-    asyncio.run(main())
