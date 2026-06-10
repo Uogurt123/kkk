@@ -1,15 +1,16 @@
 import asyncio
 import logging
+import os  # Додали, щоб Railway міг зчитувати твої змінні
 from aiogram import Bot, Dispatcher, F
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 
-# ЗАЛИШАЄМО ПУСТІ ЗМІННІ (Railway підтягне їх з розділу Variables автоматично)
-TOKEN = '' 
-ADMIN_ID = 0
-CARD_NUMBER = '0000 0000 0000 0000'
+# Тепер Railway автоматично підтягне твої приховані дані з вкладки Variables
+TOKEN = os.getenv("BOT_TOKEN")
+ADMIN_ID = int(os.getenv("ADMIN_ID", 0)) if os.getenv("ADMIN_ID") else 0
+CARD_NUMBER = os.getenv("CARD_NUMBER", "0000 0000 0000 0000")
 
 logging.basicConfig(level=logging.INFO)
 
@@ -37,7 +38,6 @@ def get_payment_keyboard():
 @dp.message(CommandStart())
 async def cmd_start(message: Message, state: FSMContext):
     await state.clear()
-    # Твій новий текст, який ти просив змінити:
     await message.answer(
         "👋 рвріфривррфвфі ніхао:",
         reply_markup=get_main_menu()
