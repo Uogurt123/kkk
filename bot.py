@@ -27,8 +27,7 @@ class PurchaseState(StatesGroup):
 def get_main_menu():
     buttons = [
         [InlineKeyboardButton(text="💎 Купити зірки", callback_data="buy_stars")],
-        [InlineKeyboardButton(text="💬 Написати Розробнику(генію тому хто сам тримає вогник
-        і взагалі легенді найкращому другу)", url="https://t.me/aquaee")],
+        [InlineKeyboardButton(text="💬 Написати Розробнику (найкращому другу)", url="https://t.me/aquaee")],
         [InlineKeyboardButton(text="ℹ️ Про бота", callback_data="about_bot")]
     ]
     return InlineKeyboardMarkup(inline_keyboard=buttons)
