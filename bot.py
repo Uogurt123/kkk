@@ -80,8 +80,8 @@ def get_cancel_keyboard():
 def get_admin_keyboard(user_id: int, stars: int):
     buttons = [
         [
-            InlineKeyboardButton(text="✅ Подтвердить", callback_data=f"confirm_{user_id}_{stars}"),
-            InlineKeyboardButton(text="❌ Отклонить", callback_data=f"reject_{user_id}")
+            InlineKeyboardButton(text="✅ Підтвердити", callback_data=f"confirm_{user_id}_{stars}"),
+            InlineKeyboardButton(text="❌ Відхилити", callback_data=f"reject_{user_id}")
         ]
     ]
     return InlineKeyboardMarkup(inline_keyboard=buttons)
@@ -92,7 +92,7 @@ def get_admin_keyboard(user_id: int, stars: int):
 async def cmd_start(message: Message, state: FSMContext):
     await state.clear()
     await message.answer(
-        "👋 <b>#абжджа8ог98аолдаво звезди купи пж:</b>\n\n"
+        "👋 <b>#удали телефон:</b>\n\n"
         "⚡ <i>Виберіть потрібну опцію в меню нижче:</i>",
         parse_mode="HTML",
         reply_markup=get_main_menu()
@@ -108,7 +108,7 @@ async def press_profile(callback: CallbackQuery):
         f"👤 <b>Мій профіль у боті:</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━\n\n"
         f"✨ <b>Ім'я:</b> {user_info.full_name}\n"
-        f"🆔 <b>Мій ТГ ID:</b> <code>{user_info.id}</code>\n"
+        f"🆔 <b>Айді ID:</b> <code>{user_info.id}</code>\n"
         f"🏷️ <b>Юзернейм:</b> {username}\n\n"
         f"📊 <b>Куплено зірок за весь час:</b> <code>{total_stars}</code> ⭐\n"
         f"━━━━━━━━━━━━━━━━━━━━"
@@ -118,13 +118,13 @@ async def press_profile(callback: CallbackQuery):
 
 @dp.callback_query(F.data == "about_bot")
 async def press_about(callback: CallbackQuery):
-    await callback.message.answer("<b>ℹ️ Інформація:</b>\n\nбот нічого не вміє і вообще не працює 🤫", parse_mode="HTML")
+    await callback.message.answer("<b>ℹ️ Інформація:</b>\n\nбот нічого не вміє і вообще не працює зроблений тільки для мене і ще одного бидла (шутка)  🤫", parse_mode="HTML")
     await callback.answer()
 
 @dp.callback_query(F.data == "buy_stars")
 async def press_buy(callback: CallbackQuery, state: FSMContext):
     await callback.message.answer(
-        "🔢 <b>Введіть кількість зірок АБО суму в гривнях:</b>\n\n"
+        "🔢 <b>Введіть кількість зірок або суму в гривнях:</b>\n\n"
         "💡 <i>Приклади введення:</i>\n"
         "• <code>100</code> — бот порахує ціну за 100 зірок\n"
         "• <code>150 грн</code> або <code>150 uah</code> — бот порахує скільки зірок вийде на 150 грн", 
