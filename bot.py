@@ -7,9 +7,9 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 
 # --- НАСТРОЙКИ ---
-TOKEN = "СЮДА_ВСТАВЬ_ТОКЕН_БОТА"
-ADMIN_ID = 123456789  # СЮДА_ВСТАВЬ_СВОЙ_ID (цифрами, без кавычек)
-CARD_NUMBER = "0000 0000 0000 0000"  # СЮДА_ВСТАВЬ_НОМЕР_КАРТЫ
+TOKEN = "8775506881:AAHvveG2ySiNSGxQDEy2ArEBuBraxJ7os88"
+ADMIN_ID = 8065826973  # СЮДА_ВСТАВЬ_СВОЙ_ID (цифрами, без кавычек)
+CARD_NUMBER = "4874070013423833"  # СЮДА_ВСТАВЬ_НОМЕР_КАРТЫ
 
 logging.basicConfig(level=logging.INFO)
 
