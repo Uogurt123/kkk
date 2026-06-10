@@ -393,8 +393,7 @@ async def press_cancel(callback: CallbackQuery, state: FSMContext):
     await callback.message.answer("Покупку скасовано.", reply_markup=get_main_menu())
     await callback.answer()
 
-async def main():
-    await dp.start_polling(bot)
-
+if __name__ == "__main__":
+    asyncio.run(main()
 if __name__ == "__main__":
     asyncio.run(main())
