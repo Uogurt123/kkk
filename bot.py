@@ -28,38 +28,47 @@ class PurchaseState(StatesGroup):
     waiting_for_amount = State()
     waiting_for_receipt = State()
 
-# --- РОБОТА З БАЗОЮ ДАНИХ (SQLite) ---
-DB_PATH = "bot_database.db"
+# --- РОБОТА З БАЗОЮ ДАНИХ (Перенесено в /tmp для Railway) ---
+DB_PATH = "/tmp/bot_database.db"
 
 def init_db():
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    # Створюємо таблицю для збереження куплених зірок користувачами
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            user_id INTEGER PRIMARY KEY,
-            total_stars INTEGER DEFAULT 0
-        )
-    """)
-    conn.commit()
-    conn.close()
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                user_id INTEGER PRIMARY KEY,
+                total_stars INTEGER DEFAULT 0
+            )
+        """)
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        logging.error(f"Помилка ініціалізації БД: {e}")
 
 def get_user_stars(user_id: int) -> int:
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("SELECT total_stars FROM users WHERE user_id = ?", (user_id,))
-    row = cursor.fetchone()
-    conn.close()
-    return row[0] if row else 0
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT total_stars FROM users WHERE user_id = ?", (user_id,))
+        row = cursor.fetchone()
+        conn.close()
+        return row[0] if row else 0
+    except Exception as e:
+        logging.error(f"Помилка отримання зірок: {e}")
+        return 0
 
 def add_user_stars(user_id: int, stars_to_add: int):
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO users (user_id, total_stars) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET total_stars = total_stars + ?", (user_id, stars_to_add, stars_to_add))
-    conn.commit()
-    conn.close()
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO users (user_id, total_stars) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET total_stars = total_stars + ?", (user_id, stars_to_add, stars_to_add))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        logging.error(f"Помилка додавання зірок в БД: {e}")
 
-# Иніціалізуємо БД при старті скрипта
+# Ініціалізуємо БД
 init_db()
 
 # --- КЛАВИАТУРЫ ---
@@ -68,7 +77,7 @@ def get_main_menu():
     buttons = [
         [InlineKeyboardButton(text="💎 Купити зірки", callback_data="buy_stars"),
          InlineKeyboardButton(text="👤 Мій профіль", callback_data="user_profile")],
-        [InlineKeyboardButton(text="💬 Написати Розробнику(генію тому хто сам тримає вогник і взагалі legenda)", url="https://t.me/aquaee")],
+        [InlineKeyboardButton(text="💬 Написати Розробнику(найкращому другу)", url="https://t.me/aquaee")],
         [InlineKeyboardButton(text="ℹ️ Про бота", callback_data="about_bot")]
     ]
     return InlineKeyboardMarkup(inline_keyboard=buttons)
@@ -92,7 +101,7 @@ def get_admin_keyboard(user_id: int, stars: int):
 async def cmd_start(message: Message, state: FSMContext):
     await state.clear()
     await message.answer(
-        "👋 <b>#удали телефон:</b>\n\n"
+        "👋 <b>ніхао :</b>\n\n"
         "⚡ <i>Виберіть потрібну опцію в меню нижче:</i>",
         parse_mode="HTML",
         reply_markup=get_main_menu()
@@ -108,7 +117,7 @@ async def press_profile(callback: CallbackQuery):
         f"👤 <b>Мій профіль у боті:</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━\n\n"
         f"✨ <b>Ім'я:</b> {user_info.full_name}\n"
-        f"🆔 <b>Айді ID:</b> <code>{user_info.id}</code>\n"
+        f"🆔 <b>ID:</b> <code>{user_info.id}</code>\n"
         f"🏷️ <b>Юзернейм:</b> {username}\n\n"
         f"📊 <b>Куплено зірок за весь час:</b> <code>{total_stars}</code> ⭐\n"
         f"━━━━━━━━━━━━━━━━━━━━"
@@ -118,7 +127,7 @@ async def press_profile(callback: CallbackQuery):
 
 @dp.callback_query(F.data == "about_bot")
 async def press_about(callback: CallbackQuery):
-    await callback.message.answer("<b>ℹ️ Інформація:</b>\n\nбот нічого не вміє і вообще не працює зроблений тільки для мене і ще одного бидла (шутка)  🤫", parse_mode="HTML")
+    await callback.message.answer("<b>ℹ️ Інформація:</b>\n\nбот нічого не вміє і взагалі не працює бот зроблений для мене і ще одного бидла (жарт) 🤫", parse_mode="HTML")
     await callback.answer()
 
 @dp.callback_query(F.data == "buy_stars")
@@ -138,12 +147,10 @@ async def press_buy(callback: CallbackQuery, state: FSMContext):
 async def process_amount_input(message: Message, state: FSMContext):
     user_input = message.text.strip().lower()
     
-    # Очищаємо текст від зайвих пробілів для перевірки на "грн" або "uah"
     is_uah = False
     if "грн" in user_input or "uah" in user_input or "грв" in user_input:
         is_uah = True
     
-    # Витягуємо тільки цифри з повідомлення за допомогою регулярного виразу
     digits = re.findall(r'\d+', user_input)
     if not digits:
         await message.answer("⚠️ <b>Помилка! Будь ласка, введіть числове значення:</b>", parse_mode="HTML", reply_markup=get_cancel_keyboard())
@@ -154,16 +161,13 @@ async def process_amount_input(message: Message, state: FSMContext):
         await message.answer("⚠️ <b>Число має бути більшим за 0!</b>", parse_mode="HTML", reply_markup=get_cancel_keyboard())
         return
 
-    # Логика калькулятора
     if is_uah:
-        # Ввели в гривнях -> рахуємо зірки (округляємо до цілого вниз)
         total_price = float(value)
         stars_amount = int(total_price / STAR_PRICE)
         if stars_amount <= 0:
             await message.answer(f"⚠️ <b>Цієї суми замало навіть для 1 зірки!</b> (1 ⭐ = {STAR_PRICE} грн)", parse_mode="HTML", reply_markup=get_cancel_keyboard())
             return
     else:
-        # Ввели в зірках -> рахуємо гривні
         stars_amount = value
         total_price = round(stars_amount * STAR_PRICE, 2)
     
@@ -198,9 +202,9 @@ async def process_receipt(message: Message, state: FSMContext):
             f"━━━━━━━━━━━━━━━━━━━━\n\n"
             f"👤 <b>користувач:</b> {user_info.full_name} ({username})\n"
             f"🆔 <b>ID:</b> <code>{user_info.id}</code>\n"
-            f"💎 <b>сумма зірок:</b> <code>{stars_amount}</code> ⭐\n"
-            f"💵 <b>сумма в грн:</b> <code>{total_price}</code> грн\n\n"
-            f"📋 <i>чек. :</i>"
+            f"💎 <b>зірки:</b> <code>{stars_amount}</code> ⭐\n"
+            f"💵 <b>Гривні:</b> <code>{total_price}</code> грн\n\n"
+            f"📋 <i>чек :</i>"
         )
         
         await bot.send_photo(
@@ -211,7 +215,7 @@ async def process_receipt(message: Message, state: FSMContext):
             reply_markup=get_admin_keyboard(user_info.id, stars_amount)
         )
     except Exception as e:
-        logging.error(f"Не удалось отправить чек админу: {e}")
+        logging.error(f"Не вдалось відправити чек: {e}")
 
     await message.answer(
         "✨ <b>Чек успішно завантажено та відправленно Адміністратору @aquaee.</b>\n\n"
@@ -222,12 +226,12 @@ async def process_receipt(message: Message, state: FSMContext):
 
 @dp.message(PurchaseState.waiting_for_receipt)
 async def process_receipt_wrong_format(message: Message):
-    await message.answer("⚠️ Будь ласка, надішліть саме <b>скріншот чека </b>:", parse_mode="HTML", reply_markup=get_cancel_keyboard())
+    await message.answer("⚠️ Будь ласка, надішліть саме <b>скріншот чека фоткою</b>:", parse_mode="HTML", reply_markup=get_cancel_keyboard())
 
 @dp.callback_query(F.data == "cancel_payment")
 async def press_cancel(callback: CallbackQuery, state: FSMContext):
     await state.clear()
-    await callback.message.answer("❌ <b>Покупку Відмінено.</b>", parse_mode="HTML", reply_markup=get_main_menu())
+    await callback.message.answer("❌ <b>Покупка Скасована.</b>", parse_mode="HTML", reply_markup=get_main_menu())
     await callback.answer()
 
 # --- ОБРАБОТКА ДЕЙСТВИЙ АДМИНИСТРАТОРА (ТЕБЯ) ---
@@ -239,7 +243,6 @@ async def admin_confirm_payment(callback: CallbackQuery):
     stars = int(data_parts[2])
     
     try:
-        # Нараховуємо користувачу зірки в базу даних після твого підтвердження
         add_user_stars(target_user_id, stars)
         
         await bot.send_message(
@@ -255,7 +258,7 @@ async def admin_confirm_payment(callback: CallbackQuery):
             parse_mode="HTML"
         )
     except Exception as e:
-        await callback.message.answer(f"Помилка Відправику Користовачу: {e}")
+        await callback.message.answer(f"Помилка відправки користовачу: {e}")
     
     await callback.answer()
 
@@ -267,17 +270,17 @@ async def admin_reject_payment(callback: CallbackQuery):
         await bot.send_message(
             chat_id=target_user_id,
             text="⚠️ <b>Помилка підтвердження платежу!</b>\n\n"
-                 "Адміністратор Відхилив заявку. Перевірте чек или напишіть в підтримку.",
+                 "Адміністратор відхилив заявку. Перевірте чек або напишіть в підтримку.",
             parse_mode="HTML"
         )
         await bot.edit_message_caption(
             chat_id=callback.message.chat.id,
             message_id=callback.message.message_id,
-            caption=callback.message.caption + "\n\n❌ <b>Статус: Отклонено тобой!</b>",
+            caption=callback.message.caption + "\n\n❌ <b>Статус: Відхилено Тобою!</b>",
             parse_mode="HTML"
         )
     except Exception as e:
-        await callback.message.answer(f"Ошибка отправки пользователю: {e}")
+        await callback.message.answer(f"Помилка відправки: {e}")
         
     await callback.answer()
 
