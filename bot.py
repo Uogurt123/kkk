@@ -127,7 +127,7 @@ async def press_profile(callback: CallbackQuery):
 
 @dp.callback_query(F.data == "about_bot")
 async def press_about(callback: CallbackQuery):
-    await callback.message.answer("<b>ℹ️ Інформація:</b>\n\nбот нічого не вміє і зроблений для мене і ще одного бидла (жарт)  🤫", parse_mode="HTML")
+    await callback.message.answer("<b>ℹ️ Інформація:</b>\n\бот зробленний для марк67148816 та настя67148818 ❤️", parse_mode="HTML")
     await callback.answer()
 
 @dp.callback_query(F.data == "buy_stars")
