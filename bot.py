@@ -77,7 +77,7 @@ def get_main_menu():
     buttons = [
         [InlineKeyboardButton(text="💎 Купити зірки", callback_data="buy_stars"),
          InlineKeyboardButton(text="👤 Мій профіль", callback_data="user_profile")],
-        [InlineKeyboardButton(text="💬 Написати Розробнику", url="https://t.me/aquaee")],
+        [InlineKeyboardButton(text="💬 Написати Розробнику(найкращому другу)", url="https://t.me/aquaee")],
         [InlineKeyboardButton(text="ℹ️ Про бота", callback_data="about_bot")]
     ]
     return InlineKeyboardMarkup(inline_keyboard=buttons)
@@ -89,8 +89,8 @@ def get_cancel_keyboard():
 def get_admin_keyboard(user_id: int, stars: int):
     buttons = [
         [
-            InlineKeyboardButton(text="✅ Подтвердить", callback_data=f"confirm_{user_id}_{stars}"),
-            InlineKeyboardButton(text="❌ Отклонить", callback_data=f"reject_{user_id}")
+            InlineKeyboardButton(text="✅ Підтвердити", callback_data=f"confirm_{user_id}_{stars}"),
+            InlineKeyboardButton(text="❌ Відхилити", callback_data=f"reject_{user_id}")
         ]
     ]
     return InlineKeyboardMarkup(inline_keyboard=buttons)
@@ -101,7 +101,7 @@ def get_admin_keyboard(user_id: int, stars: int):
 async def cmd_start(message: Message, state: FSMContext):
     await state.clear()
     await message.answer(
-        "👋 <b>#абжджа8ог98аолдаво звезди купи пж:</b>\n\n"
+        "👋 <b>звеззди бот купити платно:</b>\n\n"
         "⚡ <i>Виберіть потрібну опцію в меню нижче:</i>",
         parse_mode="HTML",
         reply_markup=get_main_menu()
@@ -117,7 +117,7 @@ async def press_profile(callback: CallbackQuery):
         f"👤 <b>Мій профіль у боті:</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━\n\n"
         f"✨ <b>Ім'я:</b> {user_info.full_name}\n"
-        f"🆔 <b>Мій ТГ ID:</b> <code>{user_info.id}</code>\n"
+        f"🆔 <b>ID:</b> <code>{user_info.id}</code>\n"
         f"🏷️ <b>Юзернейм:</b> {username}\n\n"
         f"📊 <b>Куплено зірок за весь час:</b> <code>{total_stars}</code> ⭐\n"
         f"━━━━━━━━━━━━━━━━━━━━"
@@ -127,16 +127,16 @@ async def press_profile(callback: CallbackQuery):
 
 @dp.callback_query(F.data == "about_bot")
 async def press_about(callback: CallbackQuery):
-    await callback.message.answer("<b>ℹ️ Інформація:</b>\n\nбот нічого не вміє і вообще не працює 🤫", parse_mode="HTML")
+    await callback.message.answer("<b>ℹ️ Інформація:</b>\n\nбот нічого не вміє і зроблений для мене і ще одного бидла (жарт)  🤫", parse_mode="HTML")
     await callback.answer()
 
 @dp.callback_query(F.data == "buy_stars")
 async def press_buy(callback: CallbackQuery, state: FSMContext):
     await callback.message.answer(
-        "🔢 <b>Введіть кількість зірок АБО суму в гривнях:</b>\n\n"
+        "🔢 <b>Введіть кількість зірок або суму в гривнях:</b>\n\n"
         "💡 <i>Приклади введення:</i>\n"
-        "• <code>100</code> — бот порахує ціну за 100 зірок\n"
-        "• <code>150 грн</code> або <code>150 uah</code> — бот порахує скільки зірок вийде на 150 грн", 
+        "• <code>100</code> — бот порахує ціну в зірках \n"
+        "• <code>150 грн</code> або <code>150 uah</code> — бот порахує ціну в гривнях ", 
         parse_mode="HTML",
         reply_markup=get_cancel_keyboard()
     )
@@ -179,7 +179,7 @@ async def process_amount_input(message: Message, state: FSMContext):
         f"━━━━━━━━━━━━━━━━━━━━\n\n"
         f"💳 <b>для оплати скинь дєнєшку на карту:</b>\n"
         f"<code>{CARD_NUMBER}</code> <i>(нажми щоб скопійувати)</i>\n\n"
-        f"📸 <b>ПІСЛЯ ОПЛАТИ:</b> надішліть сюди <u>скріншот чека</u> (фоткою).\n"
+        f"📸 <b>ПІСЛЯ ОПЛАТИ:</b> надішліть сюди <u>скріншот чека</u>.\n"
         f"<i>Адміністратор (я) скоро перевірить платіж (не факт).</i>",
         parse_mode="HTML",
         reply_markup=get_cancel_keyboard()
